@@ -6,7 +6,7 @@ const userSchema = new Schema({
     name: String,
     email: String,
     password: String,
-    isActive: Boolean,
+    isVerified: Boolean,
     role: String,
     refreshToken: String,
     createdAt: Date,
