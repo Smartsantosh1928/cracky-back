@@ -49,12 +49,11 @@ app.get('/auth/google',
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: 'localhost:5173', session: false }),
   (req, res) => {
-    const user = req.user;
-    console.log(user);
-    const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-    res.cookie('jwt', token, {
-        httpOnly: true,
-    });
+    const { sub, given_name, family_name, picture, email } = req.user._json;
+    const accessToken = jwt.sign({ id: sub }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+    const refreshToken = jwt.sign({ id: sub }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
+    res.cookie('accessToken', accessToken);
+    res.cookie('refreshToken', refreshToken);
     res.redirect('http://localhost:5173');
   }
 );
@@ -66,12 +65,12 @@ app.get('/auth/facebook',
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
   (req, res) => {
-    const user = req.user;
-    console.log(user);
-    const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-    res.cookie('jwt', token, {
-        httpOnly: true,
-    });
+    const { id, name, email, picture } = req.user._json;
+    console.log(picture);
+    const accessToken = jwt.sign({ id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+    const refreshToken = jwt.sign({ id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
+    res.cookie('accessToken', accessToken);
+    res.cookie('refreshToken', refreshToken);
     res.redirect('http://localhost:5173');
   }
 );
