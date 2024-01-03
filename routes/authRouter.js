@@ -27,8 +27,10 @@ router.post('/register', async (req, res) => {
     newUser.save().then((user) => {
         const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
         const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
-        sendMail(email, 'Verify your email', 'verifyEmail', { name: email, link: `http://localhost:3000/auth/verify/${accessToken}` }).then(info => {
-            res.status(201).json({ success: true, message: "User created successfully", accessToken, refreshToken });
+        user.refreshToken = refreshToken;
+        user.save().then(async () => {
+            await sendMail(email, 'Verify your email', 'verifyEmail', { url: `${process.env.DOMAIN_URL}/auth/verify/${accessToken}`, cracky_url: process.env.WEBSITE_URL, unsubscribe_url: `${process.env.DOMAIN_URL}/auth/unsubscribe/${accessToken}` })
+            res.status(201).json({ success: true, message: "Account created successfully", accessToken, refreshToken });
         })
     }).catch((err) => {
         res.status(400).json({ success: false, message: "Something went wrong", error: err.message });
@@ -53,7 +55,18 @@ router.get('/verify/:token', (req, res) => {
     jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET, (err, user) => {
         if(err) return res.sendStatus(403);
         User.findByIdAndUpdate(user.id, { isVerified: true }).then(user => {
-            res.redirect('http://localhost:5173');
+            res.redirect(process.env.WEBSITE_URL);
+        })
+    })
+})
+
+router.get('/unsubscribe/:token', (req, res) => {
+    const { token } = req.params;
+    if(token == null) return res.sendStatus(401);
+    jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET, (err, user) => {
+        if(err) return res.sendStatus(403);
+        User.findByIdAndUpdate(user.id, { emailOffers: false }).then(user => {
+            res.redirect(process.env.WEBSITE_URL);
         })
     })
 })

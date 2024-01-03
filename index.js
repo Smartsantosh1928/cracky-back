@@ -27,7 +27,7 @@ app.use(passport.initialize());
 
 app.use('/auth', authRouter);
 app.post('/auth/login', (req, res, next) => { 
-    passport.authenticate('local', { session: false, }, (err, user, info) => {
+    passport.authenticate('local', { session: false, }, async (err, user, info) => {
         if (err) {
             return next(err);
         }
@@ -37,7 +37,9 @@ app.post('/auth/login', (req, res, next) => {
         else{
             const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
             const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
-            return res.status(200).json({ success: true, message: info.message, accessToken, refreshToken });
+            user.refreshToken = refreshToken;
+            await user.save()
+              return res.status(200).json({ success: true, message: info.message, accessToken, refreshToken });
         }
     })(req, res, next);
 })

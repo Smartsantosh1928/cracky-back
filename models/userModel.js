@@ -7,6 +7,7 @@ const userSchema = new Schema({
     email: String,
     password: String,
     isVerified: Boolean,
+    emailOffers: Boolean,
     role: String,
     refreshToken: String,
     createdAt: Date,
