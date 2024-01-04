@@ -5,31 +5,46 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
 const sendMail = require('../config/mailer');
+const { verifyToken } = require('../utils/utilFuns');
 
 router.post('/register', async (req, res) => {
-    const { email, password } = req.body;
-
-    console.log(email, password);
+    const { email, password, emailOffers } = req.body;
 
     const existingUser = await User.findOne({ email: email })
     console.log(existingUser);
-    if (existingUser) {
+    if (existingUser && existingUser.providers.includes("email")) {
         return res.status(400).json({ success: false, message: "User already exists" });
     }
-
+ 
     const salt = await bcrypt.genSalt();    
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    const newUser = new User({
-        email,
-        password: hashedPassword,
-    });
+    let newUser;
+    if(existingUser){
+        existingUser.password = hashedPassword;
+        existingUser.providers.push("email");
+        existingUser.isVerified = true;
+        newUser = existingUser;
+    }else{
+        newUser = new User({
+            name: '',
+            email,
+            password: hashedPassword,
+            profilePictureUrl: '',
+            emailOffers,
+            isVerified: false,
+            role: 'user',
+            refreshToken: '',
+            providers: ["email"],
+        });
+    }
     newUser.save().then((user) => {
         const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
         const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
         user.refreshToken = refreshToken;
         user.save().then(async () => {
-            await sendMail(email, 'Verify your email', 'verifyEmail', { url: `${process.env.DOMAIN_URL}/auth/verify/${accessToken}`, cracky_url: process.env.WEBSITE_URL, unsubscribe_url: `${process.env.DOMAIN_URL}/auth/unsubscribe/${accessToken}` })
+            if(!user.isVerified){
+                await sendMail(email, 'Verify your email', 'verifyEmail', { url: `${process.env.DOMAIN_URL}/auth/verify/${accessToken}`, cracky_url: process.env.WEBSITE_URL, unsubscribe_url: `${process.env.DOMAIN_URL}/auth/unsubscribe/${accessToken}` })
+            }
             res.status(201).json({ success: true, message: "Account created successfully", accessToken, refreshToken });
         })
     }).catch((err) => {
@@ -70,5 +85,13 @@ router.get('/unsubscribe/:token', (req, res) => {
         })
     })
 })
+
+router.get('/me', verifyToken, (req, res) => {
+    const { user } = req;
+    User.findById(user.id).select('-password -refreshToken').then(user => {
+        res.json({ success: true, user });
+    })
+})
+
 
 module.exports = router

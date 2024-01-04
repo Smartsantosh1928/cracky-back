@@ -4,6 +4,8 @@ const cors = require('cors');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
+const User = require('./models/userModel');
+
 //configurations
 require('./config/db');
 const { sendMail } = require('./config/mailer');
@@ -50,13 +52,43 @@ app.get('/auth/google',
 
 app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: 'localhost:5173', session: false }),
-  (req, res) => {
-    const { sub, given_name, family_name, picture, email } = req.user._json;
+  async (req, res) => {
+    const { sub, name, picture, email } = req.user._json;
+    console.log(req.user);
     const accessToken = jwt.sign({ id: sub }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
     const refreshToken = jwt.sign({ id: sub }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
-    res.cookie('accessToken', accessToken);
-    res.cookie('refreshToken', refreshToken);
-    res.redirect('http://localhost:5173');
+    
+    const existingUser = await User.findOne({ email: email })
+    console.log(existingUser);
+    let newUser;
+    if (existingUser && existingUser.providers.includes("google")) {
+      existingUser.refreshToken = refreshToken;
+      newUser = existingUser;
+    }else if(existingUser){
+      existingUser.name = existingUser.name || name;
+      existingUser.isVerified = true;
+      existingUser.profilePictureUrl = existingUser.profilePictureUrl || picture;
+      existingUser.providers.push("google");
+      existingUser.refreshToken = refreshToken;
+      newUser = existingUser;
+    }else{
+      newUser = new User({
+        name,
+        email,
+        profilePictureUrl: picture,
+        isVerified: true,
+        emailOffers: true,
+        role: 'user',
+        refreshToken,
+        providers: ['google']
+      });
+    }
+    
+    newUser.save().then((user) => {
+      res.cookie('accessToken', accessToken);
+      res.cookie('refreshToken', refreshToken);
+      res.redirect('http://localhost:5173');
+    })
   }
 );
 
@@ -66,16 +98,43 @@ app.get('/auth/facebook',
 
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
-  (req, res) => {
+  async (req, res) => {
     const { id, name, email, picture } = req.user._json;
-    console.log(picture);
     const accessToken = jwt.sign({ id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
     const refreshToken = jwt.sign({ id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
-    res.cookie('accessToken', accessToken);
-    res.cookie('refreshToken', refreshToken);
-    res.redirect('http://localhost:5173');
-  }
-);
+    let newUser;
+    const existingUser = await User.findOne({ email: email })
+    
+    console.log(existingUser);
+    if (existingUser && existingUser.providers.includes("facebook")) {
+      existingUser.refreshToken = refreshToken;
+      newUser = existingUser;
+    }else if(existingUser){
+      existingUser.name = existingUser.name || name;
+      existingUser.isVerified = true;
+      existingUser.profilePictureUrl = existingUser.profilePictureUrl || picture.data.url;
+      existingUser.providers.push("facebook");
+      existingUser.refreshToken = refreshToken;
+      newUser = existingUser;
+    }
+    else{
+      newUser = new User({
+        name,
+        email,
+        profilePictureUrl: picture.data.url,
+        isVerified: true,
+        emailOffers: true,
+        role: 'user',
+        refreshToken,
+        providers: ['facebook']
+      });
+    }
+    newUser.save().then((user) => {
+      res.cookie('accessToken', accessToken);
+      res.cookie('refreshToken', refreshToken);
+      res.redirect('http://localhost:5173');
+    })
+});
 
 app.use('/upload',fileRouter);
 

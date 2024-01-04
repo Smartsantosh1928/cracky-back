@@ -3,8 +3,8 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-    "email": "sandy03032004sjd@gmail.com",
-    "password": "12345678"
+    "email": "smartsantosh1928@gmail.com",
+    "password": "sjdomnic"
 }
 
 ###
@@ -14,5 +14,13 @@ Content-Type: application/json
 
 {
     "email": "smartsantosh1928@gmail.com",
-    "password": "sjdomnic"
+    "password": "sjdomnic1928"
 }
+
+###
+
+GET http://localhost:3000/auth/me
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1OTYwYmM2YjMzYTBhZDUxNzllZTc2ZCIsImlhdCI6MTcwNDMzNDAxNywiZXhwIjoxNzA0MzM3NjE3fQ.GluOb_H2vBvEqTa_GLSZiglrGRgtirUvySQ8fAR6Brg
+
+###

@@ -6,12 +6,12 @@ const userSchema = new Schema({
     name: String,
     email: String,
     password: String,
+    profilePictureUrl: String,
     isVerified: Boolean,
     emailOffers: Boolean,
     role: String,
     refreshToken: String,
-    createdAt: Date,
-    updatedAt: Date,
+    providers: Array,
 });
 
 const User = mongoose.model('User', userSchema);
