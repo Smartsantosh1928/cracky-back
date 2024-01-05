@@ -52,11 +52,19 @@ router.post('/register', async (req, res) => {
     })
 })
 
+router.post('/logout', verifyToken ,async (req, res) => {
+    const { user } = req;
+    const id = user.id;
+    User.findOneAndUpdate({ id }, { refreshToken: '' }).then(() => {
+        res.sendStatus(204);
+    })
+})
+
 router.post('/getAccessToken',(req,res) => {
     const { refreshToken } = req.body;
-    if(refreshToken == null) return res.sendStatus(401).json({ success: false, message: "No refresh token" });
+    if(refreshToken == null) return res.status(401).json({ success: false, message: "No refresh token" });
     User.findOne({ refreshToken }).then(user => {
-        if(!user) return res.sendStatus(403).json({ success: false, message: "Refresh token not found" });
+        if(!user) return res.status(403).json({ success: false, message: "Refresh token not found" });
         else{
             const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
             res.json({ success: true, accessToken });

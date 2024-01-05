@@ -24,3 +24,10 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1OTYwYmM2YjMzYTBhZDUxNzllZTc2ZCIsImlhdCI6MTcwNDMzNDAxNywiZXhwIjoxNzA0MzM3NjE3fQ.GluOb_H2vBvEqTa_GLSZiglrGRgtirUvySQ8fAR6Brg
 
 ###
+
+POST http://localhost:3000/auth/getAccessToken
+Content-Type: application/json
+
+{
+    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1OTYwYmM2YjMzYTBhZDUxNzllZTc2ZCIsImlhdCI6MTcwNDQxNjc4MCwiZXhwIjoxNzA3MDA4NzgwfQ.DbViKfHd2n_T_2ePljCHR7lMSyWILtwfeZm2LDkG7mk"
+}
