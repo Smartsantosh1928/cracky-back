@@ -55,21 +55,17 @@ app.get('/auth/google/callback',
   async (req, res) => {
     const { sub, name, picture, email } = req.user._json;
     console.log(req.user);
-    const accessToken = jwt.sign({ id: sub }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
-    const refreshToken = jwt.sign({ id: sub }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
     
     const existingUser = await User.findOne({ email: email })
     console.log(existingUser);
     let newUser;
     if (existingUser && existingUser.providers.includes("google")) {
-      existingUser.refreshToken = refreshToken;
       newUser = existingUser;
     }else if(existingUser){
       existingUser.name = existingUser.name || name;
       existingUser.isVerified = true;
       existingUser.profilePictureUrl = existingUser.profilePictureUrl || picture;
       existingUser.providers.push("google");
-      existingUser.refreshToken = refreshToken;
       newUser = existingUser;
     }else{
       newUser = new User({
@@ -79,15 +75,19 @@ app.get('/auth/google/callback',
         isVerified: true,
         emailOffers: true,
         role: 'user',
-        refreshToken,
         providers: ['google']
       });
     }
     
     newUser.save().then((user) => {
-      res.cookie('accessToken', accessToken);
-      res.cookie('refreshToken', refreshToken);
-      res.redirect('http://localhost:5173');
+      const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+      const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
+      user.refreshToken = refreshToken;
+      user.save().then(async () => {  
+        res.cookie('accessToken', accessToken);
+        res.cookie('refreshToken', refreshToken);
+        res.redirect('http://localhost:5173');
+      })
     })
   }
 );
@@ -100,21 +100,17 @@ app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
   async (req, res) => {
     const { id, name, email, picture } = req.user._json;
-    const accessToken = jwt.sign({ id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
-    const refreshToken = jwt.sign({ id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
     let newUser;
     const existingUser = await User.findOne({ email: email })
     
     console.log(existingUser);
     if (existingUser && existingUser.providers.includes("facebook")) {
-      existingUser.refreshToken = refreshToken;
       newUser = existingUser;
     }else if(existingUser){
       existingUser.name = existingUser.name || name;
       existingUser.isVerified = true;
       existingUser.profilePictureUrl = existingUser.profilePictureUrl || picture.data.url;
       existingUser.providers.push("facebook");
-      existingUser.refreshToken = refreshToken;
       newUser = existingUser;
     }
     else{
@@ -125,14 +121,19 @@ app.get('/auth/facebook/callback',
         isVerified: true,
         emailOffers: true,
         role: 'user',
-        refreshToken,
         providers: ['facebook']
       });
     }
+    
     newUser.save().then((user) => {
-      res.cookie('accessToken', accessToken);
-      res.cookie('refreshToken', refreshToken);
-      res.redirect('http://localhost:5173');
+      const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+      const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
+      user.refreshToken = refreshToken;
+      user.save().then(async () => {  
+        res.cookie('accessToken', accessToken);
+        res.cookie('refreshToken', refreshToken);
+        res.redirect('http://localhost:5173');
+      })
     })
 });
 

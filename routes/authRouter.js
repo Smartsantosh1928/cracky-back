@@ -54,8 +54,7 @@ router.post('/register', async (req, res) => {
 
 router.post('/logout', verifyToken ,async (req, res) => {
     const { user } = req;
-    const id = user.id;
-    User.findOneAndUpdate({ id }, { refreshToken: '' }).then(() => {
+    User.findByIdAndUpdate(user.id, { refreshToken: '' }).then((user) => {
         res.sendStatus(204);
     })
 })
@@ -95,9 +94,12 @@ router.get('/unsubscribe/:token', (req, res) => {
 })
 
 router.get('/me', verifyToken, (req, res) => {
+    console.log(req.user);
     const { user } = req;
     User.findById(user.id).select('-password -refreshToken').then(user => {
         res.json({ success: true, user });
+    }).catch(err => {
+        res.status(400).json({ success: false, message: "Something went wrong", error: err.message });
     })
 })
 
