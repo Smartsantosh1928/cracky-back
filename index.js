@@ -13,8 +13,7 @@ const swaggerUi = require('swagger-ui-express');
 const { initializePassport } = require('./config/passport');
 
 //routes
-const authRouter = require('./routes/authRouter');
-const fileRouter = require('./routes/fileRouter');
+const { authRouter, fileRouter, userRouter } = require('./routes');
 
 const app = express();
 app.use(cors());
@@ -137,6 +136,7 @@ app.get('/auth/facebook/callback',
     })
 });
 
+app.use('/user', userRouter);
 app.use('/upload',fileRouter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('./config/swagger_output.json')));
