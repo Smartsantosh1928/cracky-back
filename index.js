@@ -40,7 +40,9 @@ app.post('/auth/login', (req, res, next) => {
             const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
             user.refreshToken = refreshToken;
             await user.save()
-              return res.status(200).json({ success: true, message: info.message, accessToken, refreshToken });
+            res.cookie('accessToken', accessToken);
+            res.cookie('refreshToken', refreshToken);
+            return res.status(200).json({ success: true, message: "Login successful" });
         }
     })(req, res, next);
 })
@@ -53,7 +55,6 @@ app.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: 'localhost:5173', session: false }),
   async (req, res) => {
     const { sub, name, picture, email } = req.user._json;
-    console.log(req.user);
     
     const existingUser = await User.findOne({ email: email })
     console.log(existingUser);
@@ -82,7 +83,8 @@ app.get('/auth/google/callback',
       const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
       const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
       user.refreshToken = refreshToken;
-      user.save().then(async () => {  
+      user.save().then(async user => {  
+        console.log(user);
         res.cookie('accessToken', accessToken);
         res.cookie('refreshToken', refreshToken);
         res.redirect('http://localhost:5173');
