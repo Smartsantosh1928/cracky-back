@@ -12,6 +12,18 @@ const userSchema = new Schema({
     role: String,
     refreshToken: String,
     providers: Array,
+    //Other Details
+    phoneNumber: String,
+    gender: String,
+    address: [{
+        addressLine1: String,
+        addressLine2: String,
+        state: String,
+        district: String,
+        city: String,
+        area: String,
+        pinCode: String
+    }],
 });
 
 const User = mongoose.model('User', userSchema);
