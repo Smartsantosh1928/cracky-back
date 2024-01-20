@@ -94,7 +94,6 @@ router.get('/unsubscribe/:token', (req, res) => {
 })
 
 router.get('/me', verifyToken, (req, res) => {
-    console.log(req.user);
     const { user } = req;
     User.findById(user.id).select('-password -refreshToken').then(user => {
         res.json({ success: true, user });
