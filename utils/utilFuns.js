@@ -12,6 +12,7 @@ function verifyToken(req, res, next) {
             console.log(err);
             return res.status(403).json({ success: false, message: "Invalid token" });
         }
+        console.log(user);
         req.user = user;
         next();
     })

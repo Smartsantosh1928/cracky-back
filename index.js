@@ -13,7 +13,7 @@ const swaggerUi = require('swagger-ui-express');
 const { initializePassport } = require('./config/passport');
 
 //routes
-const { authRouter, fileRouter, userRouter } = require('./routes');
+const { authRouter, fileRouter, userRouter } = require('./routes/user');
 
 const app = express();
 app.use(cors());
@@ -27,6 +27,7 @@ initializePassport(
 app.use(passport.initialize());
 
 app.use('/auth', authRouter);
+
 app.post('/auth/login', (req, res, next) => { 
     passport.authenticate('local', { session: false, }, async (err, user, info) => {
         if (err) {
@@ -80,8 +81,8 @@ app.get('/auth/google/callback',
     }
     
     newUser.save().then((user) => {
-      const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
-      const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
+      const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: 1*60 })
+      const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: 2*60 })
       user.refreshToken = refreshToken;
       user.save().then(async user => {  
         console.log(user);

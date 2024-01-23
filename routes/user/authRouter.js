@@ -3,9 +3,9 @@ const express = require("express");
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const User = require('../models/userModel');
-const sendMail = require('../config/mailer');
-const { verifyToken } = require('../utils/utilFuns');
+const User = require('../../models/userModel');
+const sendMail = require('../../config/mailer');
+const { verifyToken } = require('../../utils/utilFuns');
 
 router.post('/register', async (req, res) => {
     const { email, password, emailOffers } = req.body;
@@ -62,12 +62,13 @@ router.post('/logout', verifyToken ,async (req, res) => {
 router.post('/getAccessToken',(req,res) => {
     const { refreshToken } = req.body;
     if(refreshToken == null) return res.status(401).json({ success: false, message: "No refresh token" });
-    User.findOne({ refreshToken }).then(user => {
-        if(!user) return res.status(403).json({ success: false, message: "Refresh token not found" });
-        else{
-            const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, (err, user) => {
+        if(err) return res.status(403).json({ success: false, message: "Invalid refresh token" });
+        User.findById(user.id).then(user => {
+            if(user.refreshToken !== refreshToken) return res.status(403).json({ success: false, message: "Invalid refresh token" });
+            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: 1*60 })
             res.json({ success: true, accessToken });
-        }
+        })
     })
 })
 

@@ -22,7 +22,7 @@ const userSchema = new Schema({
         district: String,
         city: String,
         area: String,
-        pinCode: String
+        pincode: Number,
     }],
 });
 

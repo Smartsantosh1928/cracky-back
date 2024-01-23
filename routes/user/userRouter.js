@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const User = require('../models/userModel');
-const { verifyToken } = require('../utils/utilFuns');
+const User = require('../../models/userModel');
+const { verifyToken } = require('../../utils/utilFuns');
 
 router.get('/', verifyToken ,async (req, res) => {
     const { user } = req;
@@ -13,10 +13,11 @@ router.get('/', verifyToken ,async (req, res) => {
     })
 })
 
-router.put("/" , verifyToken, async (req, res) => {
+router.put("/update" , verifyToken, async (req, res) => {
     const { user } = req;
     const id = user.id;
-    const { name, phoneNumber, gender, emailOffers, address } = req.body;
+    const { name, phoneNumber, gender, emailOffers, address, profilePictureUrl } = req.body;
+    console.log(req.body);
     //find by id and update
     User.findById(id).then((user) => {
         user.name = name;
