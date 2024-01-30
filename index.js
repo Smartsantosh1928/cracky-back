@@ -31,7 +31,7 @@ app.use('/auth', authRouter);
 app.post('/auth/login', (req, res, next) => { 
     passport.authenticate('local', { session: false, }, async (err, user, info) => {
         if (err) {
-            return next(err);
+            return res.status(400).json({ success: false, message: "You are trying to authenticate via another method. Please login via "+err.provider.charAt(0).toUpperCase() + err.provider.slice(1) });  
         }
         if (!user) {
             return res.status(400).json({ success: false, message: info.message });

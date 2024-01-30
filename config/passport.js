@@ -18,6 +18,7 @@ const initializePassport = (passport, findById, findByEmail) => {
                 return done(null, false, { message: 'Password incorrect' });
             }
         } catch (error) {
+            error.provider = user.providers[0];
             return done(error);
         }
     }
