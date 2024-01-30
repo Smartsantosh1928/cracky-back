@@ -66,7 +66,7 @@ router.post('/getAccessToken',(req,res) => {
         if(err) return res.status(403).json({ success: false, message: "Invalid refresh token" });
         User.findById(user.id).then(user => {
             if(user.refreshToken !== refreshToken) return res.status(403).json({ success: false, message: "Invalid refresh token" });
-            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: 1*60 })
+            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: "30d" })
             res.json({ success: true, accessToken });
         })
     })

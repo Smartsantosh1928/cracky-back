@@ -81,8 +81,8 @@ app.get('/auth/google/callback',
     }
     
     newUser.save().then((user) => {
-      const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: 1*60 })
-      const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: 2*60 })
+      const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: "1h" })
+      const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: "30d" })
       user.refreshToken = refreshToken;
       user.save().then(async user => {  
         console.log(user);
