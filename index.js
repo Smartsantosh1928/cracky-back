@@ -40,10 +40,8 @@ app.post('/auth/login', (req, res, next) => {
             const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
             const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
             user.refreshToken = refreshToken;
-            await user.save()
-            res.cookie('accessToken', accessToken);
-            res.cookie('refreshToken', refreshToken);
-            return res.status(200).json({ success: true, message: "Login successful" });
+            await user.save();
+            return res.status(200).json({ success: true, message: "Login successful", accessToken, refreshToken});
         }
     })(req, res, next);
 })
