@@ -4,16 +4,17 @@ const cors = require('cors');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
-const User = require('./models/userModel');
+const User = require('./models/user');
+
+//routes
+const { authRouter, fileRouter, userRouter } = require('./routes/user');
+const { sellerAuthRouter, sellerRouter } = require('./routes/seller');
 
 //configurations
 require('./config/db');
 const { sendMail } = require('./config/mailer');
 const swaggerUi = require('swagger-ui-express');
 const { initializePassport } = require('./config/passport');
-
-//routes
-const { authRouter, fileRouter, userRouter } = require('./routes/user');
 
 const app = express();
 app.use(cors());
@@ -139,6 +140,8 @@ app.get('/auth/facebook/callback',
 
 app.use('/user', userRouter);
 app.use('/upload',fileRouter);
+
+app.use('/seller', sellerAuthRouter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('./config/swagger_output.json')));
 app.listen(process.env.PORT, () => {

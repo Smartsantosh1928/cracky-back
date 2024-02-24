@@ -18,4 +18,8 @@ function verifyToken(req, res, next) {
     })
 }
 
-module.exports = { verifyToken };
+const generateUniqueId = () => {
+    return Math.random().toString(36).substr(2, 9); // This generates a random alphanumeric string
+};
+
+module.exports = { verifyToken, generateUniqueId };

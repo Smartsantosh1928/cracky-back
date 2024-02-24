@@ -31,3 +31,30 @@ Content-Type: application/json
 {
     "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1OTYwYmM2YjMzYTBhZDUxNzllZTc2ZCIsImlhdCI6MTcwNDQxNjc4MCwiZXhwIjoxNzA3MDA4NzgwfQ.DbViKfHd2n_T_2ePljCHR7lMSyWILtwfeZm2LDkG7mk"
 }
+###
+
+GET  http://localhost:3000/seller
+
+###
+
+POST http://localhost:3000/seller/register
+Content-Type: application/json
+
+{
+    "email": "smartsantosh1928@gmail.com",
+    "password": "sjdomnic1928",
+    "name": "Santosh",
+    "phone": "1234567890",
+    "shopName": "Santosh Shop",
+    "shopLogo": "Image",
+    "gst": "String"
+}
+###
+
+POST http://localhost:3000/seller/login
+Content-Type: application/json
+
+{
+    "email": "smartsantosh18@gmail.com",
+    "password": "sjdomnic1928"
+}
