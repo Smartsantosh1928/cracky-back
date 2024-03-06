@@ -1,8 +1,8 @@
 require('dotenv').config();
 const express = require("express");
 const router = express.Router();
-const Seller = require('../../models/seller')
-const User = require('../../models/user')
+const Seller = require('../../models/seller/sellerModel')
+const User = require('../../models/user/userModel')
 const bcrypt = require('bcrypt'); 
 const jwt = require('jsonwebtoken');
 const { generateUniqueId } = require('../../utils/utilFuns');

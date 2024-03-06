@@ -4,7 +4,7 @@ const cors = require('cors');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
-const User = require('./models/user');
+const User = require('./models/user/userModel');
 
 //routes
 const { authRouter, fileRouter, userRouter } = require('./routes/user');
